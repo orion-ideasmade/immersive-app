@@ -1,0 +1,124 @@
+Please turn this into a next.js react component
+
+<--html-->
+<div class="dummy"></div>
+<div class="benefitSection">
+  <div id="benefitTitle_1" class="benefitTitle"><h2>A weightless yet potent evolution<h2>
+<p>The formulation’s lightweight texture belies its efficacy</p></div>
+  <div id="benefitTitle_2" class="benefitTitle">Lorem Ipsum 2</div>
+  <div id="benefitTitle_3" class="benefitTitle">Lorem Ipsum 3</div>
+
+<video id="v0" poster="" loop="" muted="" playsinline="" src="https://www.apple.com/media/us/mac-pro/2013/16C1b6b5-1d91-4fef-891e-ff2fc1c1bb58/videos/macpro_main_desktop.mp4" width="100%"></video>
+
+</div>
+<div class="dummy"></div>
+<!--html-->
+
+
+<style>
+body, html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.benefitSection {
+  position: relative;
+  height: 100vh;
+}
+.dummy {
+  height: 100vh;
+  background: #343434;
+}
+.benefitTitle {
+  position: absolute;
+  width: 70vw;
+  height: 100vh;
+  left: 50%;
+  color: white;
+  font-weight: normal;
+  font-family: sans-serif;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  top: 50%;
+}
+
+.benefitTitle h2 {font-size: 1.6rem;}
+.benefitTitle p {font-size: 1rem;}
+
+#v0 {
+ height: 100vh;
+ width: 100%;
+ object-fit: cover;
+}
+</style>
+
+<script>
+gsap.registerPlugin("ScrollTrigger");
+
+let boxer_tl,
+    mobile = window.innerWidth < 200;
+
+function initTimeline() {
+  boxer_tl = gsap.timeline({
+    defaults: {
+      duration: 0.67,
+      ease: "expo.out"
+    },
+     scrollTrigger: {
+      trigger: ".benefitSection",
+      start: "top top",
+      end: "+=1500",
+      markers: true,
+      pin: true,
+      scrub: 0.5
+    }
+  });
+}
+
+function createTimeline() {
+  boxer_tl.set(".benefitTitle", {yPercent: 100, opacity: 0, autoAlpha: 0});
+
+  boxer_tl.add("boxer_intro")
+          .to("#benefitTitle_1", {yPercent: -50, opacity: 1, autoAlpha: 1}, "boxer_intro")
+          .fromTo("#benefitTitle_1", {yPercent: -50, opacity: 1, autoAlpha: 1, ease: "expo.in"}, {yPercent: -100, opacity: 0, autoAlpha: 0}, "+=0.5")
+          .to("#benefitTitle_2", {yPercent: -50, opacity: 1, autoAlpha: 1})
+          .fromTo("#benefitTitle_2", {yPercent: -50, opacity: 1, autoAlpha: 1, ease: "expo.in"}, {yPercent: -100, opacity: 0, autoAlpha: 0}, "+=0.5")
+          .to("#benefitTitle_3", {yPercent: -50, opacity: 1, autoAlpha: 1})
+          .fromTo("#benefitTitle_3", {yPercent: -50, opacity: 1, autoAlpha: 1, ease: "expo.in"}, {yPercent: -100, opacity: 0, autoAlpha: 0}, "+=0.5");
+}
+
+
+initTimeline();
+createTimeline();
+
+//video animation
+var frameNumber = 0, // start video at frame 0
+    // lower numbers = faster playback
+    playbackConst = 500, 
+    // get page height from video duration
+    setHeight = document.getElementById("set-height"), 
+    // select video element         
+    vid = document.getElementById('v0'); 
+
+// dynamically set the page height according to video length
+vid.addEventListener('loadedmetadata', function() {
+  setHeight.style.height = Math.floor(vid.duration) * playbackConst + "px";
+});
+
+// Use requestAnimationFrame for smooth playback
+function scrollPlay(){  
+  var frameNumber  = window.pageYOffset/playbackConst;
+  vid.currentTime  = frameNumber;
+  window.requestAnimationFrame(scrollPlay);
+}
+
+window.requestAnimationFrame(scrollPlay);
+
+// ensure video autoplays
+window.addEventListener("load", function() {
+   const video = document.getElementById("v0");
+   video.loop = true;
+   video.muted = true;
+   video.controls = false;
+});
+</script>
