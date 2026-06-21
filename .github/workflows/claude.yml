@@ -30,9 +30,22 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install gstack for Claude Code
+        run: |
+          set -euo pipefail
+          rm -rf ~/.claude/skills/gstack
+          mkdir -p ~/.claude/skills
+          git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+          cd ~/.claude/skills/gstack
+          ./setup
+
       - name: Run Claude Code
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: |
             --max-turns 8
+            --append-system-prompt "gstack is installed at ~/.claude/skills/gstack. Use gstack skills/slash-command workflows when useful for planning, review, QA, release, and product/engineering critique. Prefer ticket-driven work: understand the GitHub issue, plan briefly, implement only what is requested, verify with tests/builds, and report concise results."
