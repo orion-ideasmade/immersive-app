@@ -1,0 +1,59 @@
+name: Claude Plan Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Product/PRD validation prompt before GitHub execution tickets exist.'
+        required: true
+        type: string
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install gstack for Claude Code
+        run: |
+          set -euo pipefail
+          rm -rf ~/.claude/skills/gstack
+          mkdir -p ~/.claude/skills
+          git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+          cd ~/.claude/skills/gstack
+          ./setup
+
+      - name: Run Claude plan validation
+        id: claude_plan
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: ${{ github.event.inputs.prompt }}
+          claude_args: |
+            --max-turns 10
+            --append-system-prompt "gstack is installed at ~/.claude/skills/gstack. This is a plan/validation run before GitHub tickets exist. Use gstack-style office-hours, CEO review, design review, engineering review, and startup validation discipline. Do not edit files, create branches, commit, push, or open PRs. Return a concise artifact Hermes can copy into Notion PRDs and then split into GitHub issues."
+            --json-schema '{"type":"object","properties":{"recommendation":{"type":"string","enum":["Pursue","Research first","Park","Kill"]},"bottom_line":{"type":"string"},"validation":{"type":"string"},"prd_markdown":{"type":"string"},"architecture_decisions":{"type":"array","items":{"type":"string"}},"risks":{"type":"array","items":{"type":"string"}},"suggested_github_issues":{"type":"array","items":{"type":"string"}}},"required":["recommendation","bottom_line","validation","prd_markdown","risks","suggested_github_issues"]}'
+
+      - name: Save structured output
+        run: |
+          cat > claude-plan-output.json <<'EOF'
+          ${{ steps.claude_plan.outputs.structured_output }}
+          EOF
+          python -m json.tool claude-plan-output.json > /tmp/claude-plan-output.pretty.json
+          mv /tmp/claude-plan-output.pretty.json claude-plan-output.json
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-plan-output
+          path: claude-plan-output.json
