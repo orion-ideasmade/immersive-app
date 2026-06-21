@@ -40,7 +40,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: ${{ github.event.inputs.prompt }}
           claude_args: |
-            --max-turns 10
+            --max-turns 20
             --append-system-prompt "gstack is installed at ~/.claude/skills/gstack. This is a plan/validation run before GitHub tickets exist. Use gstack-style office-hours, CEO review, design review, engineering review, and startup validation discipline. Do not edit files, create branches, commit, push, or open PRs. Return a concise artifact Hermes can copy into Notion PRDs and then split into GitHub issues."
             --json-schema '{"type":"object","properties":{"recommendation":{"type":"string","enum":["Pursue","Research first","Park","Kill"]},"bottom_line":{"type":"string"},"validation":{"type":"string"},"prd_markdown":{"type":"string"},"architecture_decisions":{"type":"array","items":{"type":"string"}},"risks":{"type":"array","items":{"type":"string"}},"suggested_github_issues":{"type":"array","items":{"type":"string"}}},"required":["recommendation","bottom_line","validation","prd_markdown","risks","suggested_github_issues"]}'
 
